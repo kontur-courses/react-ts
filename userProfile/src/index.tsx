@@ -1,4 +1,74 @@
 import './style.css';
+import React, { useState } from 'react';
+import ReactDom from 'react-dom';
+import { Button, Input, Select, Gapped, Modal } from '@skbkontur/react-ui';
+
+const Form = () => {
+    const [modalState, setModalState] = useState(false);
+    const [userInfo, setUserInfo] = useState<{ name: string, surname: string, city: string, [index: string]: string }>({ name: '', surname: '', city: '' });
+    const [prevUserInfo, setPrevUserInfo] = useState(userInfo);
+    const cities = [Select.static(() => <Select.Item>Выберите город</Select.Item>), 'Екатеринбург', 'Москва', 'Омск', 'Суздаль'];
+
+    const close = () => {
+        setModalState(modalState => modalState = false);
+        setPrevUserInfo(prev => prev = userInfo);
+    }
+
+    const open = () => {
+        setModalState(modalState => modalState = true);
+    }
+    
+    const renderChangeNote = (formField: string, property: string) => {
+        if (prevUserInfo[property] !== userInfo[property]) {
+            return <p>{formField}: было "{prevUserInfo[property] || ' '}", стало "{userInfo[property]}"</p>;
+        }
+        return null;
+    }
+
+    const renderModal = () => {
+        return (
+            <Modal onClose={close}>
+                <Modal.Header>Пользователь сохранен</Modal.Header>
+                <Modal.Body>
+                    {renderChangeNote('Имя', 'name')}
+                    {renderChangeNote('Фамилия', 'surname')}
+                    {renderChangeNote('Город', 'city')}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={close}>Закрыть</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
+
+    const changeHandler = (value: string, property: string) => {
+        return value !== userInfo[property] && setUserInfo(userInfo => ({ ...userInfo, [property]: value }))
+    }
+
+    return (
+        <div className="userForm">
+            {modalState && renderModal()}
+            <Gapped gap={15} vertical>
+                <h2>Информация о пользователе</h2>
+                <label className="userInfo">
+                    Имя
+                    <Input placeholder="Введите имя пользователя" onValueChange={value => changeHandler(value, 'name')} />
+                </label>
+                <label className="userInfo">
+                    Фамилия
+                    <Input placeholder="Введите фамилию пользователя" onValueChange={value => changeHandler(value, 'surname')} />
+                </label>
+                <label className="userInfo">
+                    Город
+                    <Select items={cities} placeholder="Выберите город" width="150px" onValueChange={(value: {}) => changeHandler(`${value}`, 'city')} />
+                </label>
+                <Button use="primary" size="large" onClick={open}>Сохранить</Button>
+            </Gapped>
+        </div>
+    );
+};
+
+ReactDom.render(<Form />, document.getElementById('app'));
 
 /**
  *  Итак, перед тобой пустой проект. Давай его чем-то заполним. Не стесняйся подсматривать в уже сделанные задачи,
@@ -55,5 +125,3 @@ import './style.css';
  *      гражданство, национальность, номер телефона и адрес электронной почты.
  *      Придумай, как избежать излишнего дублирования.
  */
-
-console.log('Hi from script!');
